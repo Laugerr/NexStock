@@ -1,0 +1,274 @@
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
+
+const RESOURCES = [
+  'warehouse',
+  'zone',
+  'location',
+  'product',
+  'inventory',
+  'stock-movement',
+  'user',
+  'audit-log',
+]
+const ACTIONS = ['create', 'read', 'update', 'delete']
+
+async function main() {
+  console.info('Starting seed...')
+
+  // ── Permissions ────────────────────────────────────────────────────────────
+  const permissions = []
+  for (const resource of RESOURCES) {
+    for (const action of ACTIONS) {
+      const permission = await prisma.permission.upsert({
+        where: { action_resource: { action, resource } },
+        update: {},
+        create: { action, resource },
+      })
+      permissions.push(permission)
+    }
+  }
+  console.info(`Seeded ${permissions.length} permissions`)
+
+  // ── Roles ──────────────────────────────────────────────────────────────────
+  const adminRole = await prisma.role.upsert({
+    where: { name: 'admin' },
+    update: {},
+    create: {
+      name: 'admin',
+      description: 'Full system access',
+      rolePermissions: {
+        create: permissions.map((p) => ({ permissionId: p.id })),
+      },
+    },
+  })
+
+  const managerRole = await prisma.role.upsert({
+    where: { name: 'warehouse_manager' },
+    update: {},
+    create: {
+      name: 'warehouse_manager',
+      description: 'Warehouse operations management',
+      rolePermissions: {
+        create: permissions
+          .filter((p) => p.resource !== 'user' || p.action === 'read')
+          .map((p) => ({ permissionId: p.id })),
+      },
+    },
+  })
+
+  const pickerRole = await prisma.role.upsert({
+    where: { name: 'picker' },
+    update: {},
+    create: {
+      name: 'picker',
+      description: 'Stock picking and receiving operations',
+      rolePermissions: {
+        create: permissions
+          .filter(
+            (p) =>
+              p.action === 'read' ||
+              (p.resource === 'stock-movement' && p.action === 'create'),
+          )
+          .map((p) => ({ permissionId: p.id })),
+      },
+    },
+  })
+
+  console.info(`Seeded roles: admin, warehouse_manager, picker`)
+
+  // ── Users ──────────────────────────────────────────────────────────────────
+  const adminPasswordHash = await bcrypt.hash('Admin@123!', 12)
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@nexstock.com' },
+    update: {},
+    create: {
+      email: 'admin@nexstock.com',
+      passwordHash: adminPasswordHash,
+      firstName: 'System',
+      lastName: 'Admin',
+      roleId: adminRole.id,
+    },
+  })
+
+  const managerPasswordHash = await bcrypt.hash('Manager@123!', 12)
+  await prisma.user.upsert({
+    where: { email: 'manager@nexstock.com' },
+    update: {},
+    create: {
+      email: 'manager@nexstock.com',
+      passwordHash: managerPasswordHash,
+      firstName: 'Jane',
+      lastName: 'Manager',
+      roleId: managerRole.id,
+    },
+  })
+
+  const pickerPasswordHash = await bcrypt.hash('Picker@123!', 12)
+  await prisma.user.upsert({
+    where: { email: 'picker@nexstock.com' },
+    update: {},
+    create: {
+      email: 'picker@nexstock.com',
+      passwordHash: pickerPasswordHash,
+      firstName: 'John',
+      lastName: 'Picker',
+      roleId: pickerRole.id,
+    },
+  })
+
+  console.info('Seeded users')
+
+  // ── Warehouse ──────────────────────────────────────────────────────────────
+  const warehouse = await prisma.warehouse.upsert({
+    where: { code: 'WH-001' },
+    update: {},
+    create: {
+      code: 'WH-001',
+      name: 'Main Distribution Center',
+      description: 'Primary warehouse and distribution hub',
+      address: '123 Logistics Avenue',
+      city: 'Chicago',
+      state: 'IL',
+      country: 'US',
+      postalCode: '60601',
+    },
+  })
+
+  // ── Zones ──────────────────────────────────────────────────────────────────
+  const receivingZone = await prisma.zone.upsert({
+    where: { warehouseId_code: { warehouseId: warehouse.id, code: 'RCV' } },
+    update: {},
+    create: {
+      warehouseId: warehouse.id,
+      code: 'RCV',
+      name: 'Receiving',
+      type: 'RECEIVING',
+    },
+  })
+
+  const storageZone = await prisma.zone.upsert({
+    where: { warehouseId_code: { warehouseId: warehouse.id, code: 'STG' } },
+    update: {},
+    create: {
+      warehouseId: warehouse.id,
+      code: 'STG',
+      name: 'Main Storage',
+      type: 'STORAGE',
+    },
+  })
+
+  await prisma.zone.upsert({
+    where: { warehouseId_code: { warehouseId: warehouse.id, code: 'PKG' } },
+    update: {},
+    create: {
+      warehouseId: warehouse.id,
+      code: 'PKG',
+      name: 'Picking Zone',
+      type: 'PICKING',
+    },
+  })
+
+  // ── Locations ──────────────────────────────────────────────────────────────
+  const rcvLocation = await prisma.location.upsert({
+    where: { zoneId_code: { zoneId: receivingZone.id, code: 'RCV-001' } },
+    update: {},
+    create: {
+      zoneId: receivingZone.id,
+      code: 'RCV-001',
+      aisle: 'R',
+      bay: '01',
+      level: 'G',
+    },
+  })
+
+  // Storage grid: Aisle A, bays 01-05, levels A/B/C
+  const storageLocations = []
+  for (let bay = 1; bay <= 5; bay++) {
+    for (const level of ['A', 'B', 'C']) {
+      const code = `A-${bay.toString().padStart(2, '0')}-${level}`
+      const loc = await prisma.location.upsert({
+        where: { zoneId_code: { zoneId: storageZone.id, code } },
+        update: {},
+        create: {
+          zoneId: storageZone.id,
+          code,
+          aisle: 'A',
+          bay: bay.toString().padStart(2, '0'),
+          level,
+        },
+      })
+      storageLocations.push(loc)
+    }
+  }
+
+  console.info(`Seeded 1 warehouse, 3 zones, ${storageLocations.length + 1} locations`)
+
+  // ── Products ───────────────────────────────────────────────────────────────
+  const productData = [
+    { sku: 'PROD-001', name: 'Widget Pro A', category: 'Electronics', unit: 'EACH', barcode: '1234567890001' },
+    { sku: 'PROD-002', name: 'Widget Pro B', category: 'Electronics', unit: 'EACH', barcode: '1234567890002' },
+    { sku: 'PROD-003', name: 'Premium Cable Set', category: 'Accessories', unit: 'SET', barcode: '1234567890003' },
+    { sku: 'PROD-004', name: 'Packaging Box (S)', category: 'Packaging', unit: 'EACH', barcode: '1234567890004' },
+    { sku: 'PROD-005', name: 'Packaging Box (L)', category: 'Packaging', unit: 'EACH', barcode: '1234567890005' },
+  ]
+
+  const products = []
+  for (const data of productData) {
+    const product = await prisma.product.upsert({
+      where: { sku: data.sku },
+      update: {},
+      create: data,
+    })
+    products.push(product)
+  }
+
+  console.info(`Seeded ${products.length} products`)
+
+  // ── Inventory & Stock Movements ────────────────────────────────────────────
+  // Place initial stock for each product in storage locations
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i]
+    const location = storageLocations[i % storageLocations.length]
+
+    await prisma.inventoryItem.upsert({
+      where: { productId_locationId: { productId: product.id, locationId: location.id } },
+      update: {},
+      create: {
+        productId: product.id,
+        locationId: location.id,
+        quantity: 100 + i * 50,
+      },
+    })
+
+    await prisma.stockMovement.create({
+      data: {
+        type: 'RECEIPT',
+        productId: product.id,
+        toLocationId: rcvLocation.id,
+        quantity: 100 + i * 50,
+        reference: `GRN-SEED-${i + 1}`,
+        notes: 'Initial stock receipt (seed)',
+        performedById: adminUser.id,
+        status: 'COMPLETED',
+      },
+    })
+  }
+
+  console.info('Seeded inventory and stock movements')
+  console.info('\n✅ Seed complete!')
+  console.info('──────────────────────────────────────')
+  console.info('Admin:   admin@nexstock.com  / Admin@123!')
+  console.info('Manager: manager@nexstock.com / Manager@123!')
+  console.info('Picker:  picker@nexstock.com  / Picker@123!')
+  console.info('──────────────────────────────────────')
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(() => prisma.$disconnect())
