@@ -4,8 +4,10 @@ import { FastifyInstance } from 'fastify'
 import { env } from '../config/env'
 
 async function corsPlugin(fastify: FastifyInstance) {
+  const origins = env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+
   await fastify.register(fcors, {
-    origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
+    origin: origins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })

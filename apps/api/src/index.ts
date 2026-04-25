@@ -2,7 +2,6 @@ import 'dotenv/config'
 import { buildServer } from './server'
 import { env } from './config/env'
 import { db } from './config/database'
-import { closeRedis } from './config/redis'
 
 async function main() {
   const app = await buildServer()
@@ -12,7 +11,6 @@ async function main() {
     app.log.info(`Received ${signal}, shutting down gracefully...`)
     await app.close()
     await db.$disconnect()
-    await closeRedis()
     process.exit(0)
   }
 

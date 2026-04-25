@@ -9,6 +9,10 @@ import { InventoryPage } from '@/pages/inventory/InventoryPage'
 import { StockMovementsPage } from '@/pages/stock-movements/StockMovementsPage'
 import { UsersPage } from '@/pages/users/UsersPage'
 import { AuditPage } from '@/pages/audit/AuditPage'
+import { GrnPage } from '@/pages/grn/GrnPage'
+import { PutAwayPage } from '@/pages/put-away/PutAwayPage'
+import { PickPackPage } from '@/pages/pick-pack/PickPackPage'
+import { CycleCountPage } from '@/pages/cycle-count/CycleCountPage'
 import { useAuthStore } from '@/store/auth.store'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -50,6 +54,10 @@ export const router = createBrowserRouter([
       { path: 'stock-movements', element: <StockMovementsPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'audit', element: <AuditPage /> },
+      { path: 'grn', element: <GrnPage /> },
+      { path: 'put-away', element: <PutAwayPage /> },
+      { path: 'pick-pack', element: <PickPackPage /> },
+      { path: 'cycle-count', element: <CycleCountPage /> },
     ],
   },
   {

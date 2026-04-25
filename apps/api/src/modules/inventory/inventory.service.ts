@@ -7,13 +7,19 @@ export async function getInventory(opts: {
   take: number
   warehouseId?: string
   productId?: string
+  locationId?: string
+  zoneType?: string
   search?: string
 }) {
+  const locationFilter: Prisma.LocationWhereInput = {
+    ...(opts.warehouseId && { zone: { warehouseId: opts.warehouseId } }),
+    ...(opts.zoneType && { zone: { type: opts.zoneType as Prisma.EnumZoneTypeFilter } }),
+  }
+
   const where: Prisma.InventoryItemWhereInput = {
     ...(opts.productId && { productId: opts.productId }),
-    ...(opts.warehouseId && {
-      location: { zone: { warehouseId: opts.warehouseId } },
-    }),
+    ...(opts.locationId && { locationId: opts.locationId }),
+    ...(Object.keys(locationFilter).length > 0 && { location: locationFilter }),
     ...(opts.search && {
       OR: [
         { product: { name: { contains: opts.search, mode: 'insensitive' } } },

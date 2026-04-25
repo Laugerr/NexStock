@@ -3,8 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // DATABASE_URL  → Supabase connection pooler URL (PgBouncer, port 6543)
+  //                 Append ?pgbouncer=true&connection_limit=1 for serverless
+  //                 Example: postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+  url       = env("DATABASE_URL")
+  // DIRECT_URL    → Supabase direct connection URL (port 5432)
+  //                 Used only by the Prisma CLI (migrate, introspect, studio)
+  //                 Example: postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres
+  directUrl = env("DIRECT_URL")
 }
 
 // ==================== AUTH & RBAC ====================
@@ -217,6 +224,19 @@ enum MovementStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+// ==================== RATE LIMITING ====================
+
+model RateLimit {
+  id        String   @id @default(uuid())
+  key       String   @unique // "{ip}:{route}"
+  count     Int      @default(1)
+  resetAt   DateTime @map("reset_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([resetAt])
+  @@map("rate_limits")
 }
 
 // ==================== AUDIT ====================

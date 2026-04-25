@@ -14,6 +14,8 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         limit?: string
         warehouseId?: string
         productId?: string
+        locationId?: string
+        zoneType?: string
         search?: string
       }
       const { page, limit, skip } = buildPaginationArgs(query)
@@ -23,6 +25,8 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         take: limit,
         warehouseId: query.warehouseId,
         productId: query.productId,
+        locationId: query.locationId,
+        zoneType: query.zoneType,
         search: query.search,
       })
 

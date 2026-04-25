@@ -15,16 +15,18 @@ interface InventoryFilters {
   warehouseId?: string
   productId?: string
   search?: string
+  zoneType?: string
 }
 
 export function useInventory(filters: InventoryFilters = {}) {
-  const { page = 1, limit = 20, warehouseId, productId, search } = filters
+  const { page = 1, limit = 20, warehouseId, productId, search, zoneType } = filters
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
     ...(warehouseId && { warehouseId }),
     ...(productId && { productId }),
     ...(search && { search }),
+    ...(zoneType && { zoneType }),
   })
 
   return useQuery({

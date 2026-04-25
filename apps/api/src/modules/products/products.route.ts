@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify'
+import { db } from '../../config/database'
 import { createProductSchema, updateProductSchema, productQuerySchema } from './products.schema'
 import {
   getProducts,
@@ -29,6 +30,27 @@ export async function productRoutes(fastify: FastifyInstance) {
       })
 
       return reply.send(paginatedResponse(items, total, page, limit))
+    },
+  )
+
+  // GET /api/v1/products/lookup?barcode=X&sku=Y
+  fastify.get(
+    '/lookup',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { barcode, sku } = request.query as { barcode?: string; sku?: string }
+
+      const product = await db.product.findFirst({
+        where: {
+          OR: [
+            ...(barcode ? [{ barcode }] : []),
+            ...(sku ? [{ sku: { equals: sku, mode: 'insensitive' as const } }] : []),
+          ],
+          isActive: true,
+        },
+      })
+
+      return reply.send(successResponse(product))
     },
   )
 
