@@ -1,0 +1,37 @@
+name: Trivy — Dependency & Misconfiguration Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  trivy:
+    name: Scan filesystem
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy (filesystem mode)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          # Fail on HIGH or CRITICAL vulnerabilities
+          severity: HIGH,CRITICAL
+          # Skip dev dependencies — they don't ship to production
+          skip-dirs: 'node_modules'
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif

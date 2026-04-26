@@ -1,0 +1,34 @@
+# Gitleaks configuration
+# Docs: https://github.com/gitleaks/gitleaks#configuration
+title = "NexStock gitleaks config"
+
+[extend]
+# Start from the default ruleset and add allowlists below
+useDefault = true
+
+[[allowlists]]
+description = "Demo credentials in seed file — intentionally public, documented in README"
+paths = [
+  "apps/api/prisma/seed.ts",
+]
+
+[[allowlists]]
+description = ".env.example files contain placeholder values only, never real secrets"
+paths = [
+  ".env.example",
+  "apps/api/.env.example",
+  "apps/web/.env.example",
+]
+
+[[allowlists]]
+description = "README demo credentials table — public by design, rate-limited in production"
+paths = [
+  "README.md",
+  "docs/.*",
+]
+
+[[allowlists]]
+description = "Generated Prisma migration SQL — no secrets, schema definitions only"
+paths = [
+  "apps/api/prisma/migrations/.*",
+]

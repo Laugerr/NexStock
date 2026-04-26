@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Typecheck · Lint · Build · Prisma
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: apps/api
+        env:
+          # Fake but syntactically valid URLs — prisma generate does not connect to DB
+          DATABASE_URL: postgresql://postgres:ci@localhost:5432/nexstock
+          DIRECT_URL: postgresql://postgres:ci@localhost:5432/nexstock
+        run: npx prisma generate
+
+      - name: Typecheck (all workspaces)
+        run: npm run typecheck
+
+      - name: Lint (all workspaces)
+        run: npm run lint
+
+      - name: Build web
+        working-directory: apps/web
+        run: npm run build
+
+      - name: Prisma validate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:ci@localhost:5432/nexstock
+          DIRECT_URL: postgresql://postgres:ci@localhost:5432/nexstock
+        run: npx prisma validate

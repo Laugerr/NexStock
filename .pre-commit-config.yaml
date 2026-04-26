@@ -1,0 +1,15 @@
+# Pre-commit hooks
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# What this does on every commit:
+#   1. gitleaks — scans for secrets/credentials before they leave your machine
+#
+# The gitleaks allowlist is in .gitleaks.toml (demo seed data, .env.example, etc.)
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        args: ["--config", ".gitleaks.toml"]
