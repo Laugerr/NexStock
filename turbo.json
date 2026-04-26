@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV", "DATABASE_URL", "DIRECT_URL", "JWT_SECRET", "JWT_EXPIRES_IN", "LOG_LEVEL", "CORS_ORIGINS", "PORT"]
     },
     "dev": {
       "cache": false,
