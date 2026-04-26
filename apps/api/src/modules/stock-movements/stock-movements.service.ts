@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { db } from '../../config/database'
 import { BadRequestError, NotFoundError } from '../../shared/errors/app-error'
 import { adjustInventory } from '../inventory/inventory.service'
-import type { CreateStockMovementInput, StockMovementQuery } from './stock-movements.schema'
+import type { CreateStockMovementInput } from './stock-movements.schema'
 
 export async function getStockMovements(opts: {
   skip: number

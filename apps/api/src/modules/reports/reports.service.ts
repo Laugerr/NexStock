@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { db } from '../../config/database'
 
 interface DayCount {

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { db } from '../../config/database'
 import { ConflictError, NotFoundError } from '../../shared/errors/app-error'
-import type { CreateProductInput, ProductQuery, UpdateProductInput } from './products.schema'
+import type { CreateProductInput, UpdateProductInput } from './products.schema'
 
 export async function getProducts(opts: {
   skip: number

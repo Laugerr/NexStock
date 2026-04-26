@@ -1,4 +1,4 @@
-import { Package, Warehouse, ArrowRightLeft, BoxesIcon, TrendingUp } from 'lucide-react'
+import { Package, Warehouse, BoxesIcon, TrendingUp } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -12,12 +12,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { Badge, movementTypeVariant } from '@/components/ui/Badge'
-import { useInventorySummary } from '@/hooks/use-inventory'
 import { useStockMovements } from '@/hooks/use-stock-movements'
 import { useDashboardSummary, useMovementTrend, useMovementsByType, useStockByCategory } from '@/hooks/use-reports'
 import { useAuthStore } from '@/store/auth.store'

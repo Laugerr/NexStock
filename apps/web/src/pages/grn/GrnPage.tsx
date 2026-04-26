@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Plus, Trash2, PackageCheck, ClipboardList } from 'lucide-react'
+import { Trash2, PackageCheck, ClipboardList } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'

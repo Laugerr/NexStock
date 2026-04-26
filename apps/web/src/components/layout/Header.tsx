@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, User } from 'lucide-react'
+import { ChevronDown, LogOut } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useAuthStore } from '@/store/auth.store'
 import { useLogout } from '@/hooks/use-auth'
