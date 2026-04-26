@@ -2,10 +2,20 @@ import axios, { AxiosError } from 'axios'
 import { useAuthStore } from '@/store/auth.store'
 import type { ApiError } from '@/types/api.types'
 
+/**
+ * VITE_API_URL controls where API calls go:
+ *
+ *  Dev (Vite proxy):   not set → baseURL '' → proxy rewrites /api/* → localhost:3001
+ *  Prod (same domain): not set → baseURL '' → /api/* hits Vercel functions on same origin
+ *  Prod (two projects): VITE_API_URL = https://nexstock-api.vercel.app → cross-origin
+ *
+ * Never hardcode a URL here — always read from the env var.
+ */
 const apiClient = axios.create({
-  baseURL: '/', // Using Vite proxy — all /api/* requests forwarded to :3001
+  baseURL: import.meta.env.VITE_API_URL ?? '',
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15_000,
+  // 30 s: covers Vercel cold starts (~500–1500 ms) plus actual execution time
+  timeout: 30_000,
 })
 
 // Attach JWT on every request
@@ -23,7 +33,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError<ApiError>) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout()
-      // Don't use navigate here to avoid React context issues; let ProtectedRoute handle it
+      // Don't navigate here — ProtectedRoute handles the redirect
     }
     return Promise.reject(error)
   },
