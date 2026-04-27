@@ -70,8 +70,8 @@ export async function createProduct(input: CreateProductInput) {
   return db.product.create({
     data: {
       ...input,
-      weight: input.weight ? new Prisma.Decimal(input.weight) : undefined,
-    },
+      weight: input.weight != null ? new Prisma.Decimal(input.weight) : undefined,
+    } as Prisma.ProductUncheckedCreateInput,
   })
 }
 
@@ -83,8 +83,8 @@ export async function updateProduct(id: string, input: UpdateProductInput) {
     where: { id },
     data: {
       ...input,
-      weight: input.weight ? new Prisma.Decimal(input.weight) : undefined,
-    },
+      weight: input.weight != null ? new Prisma.Decimal(input.weight) : undefined,
+    } as Prisma.ProductUncheckedUpdateInput,
   })
 }
 

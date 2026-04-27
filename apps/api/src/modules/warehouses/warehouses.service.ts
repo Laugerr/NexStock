@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { db } from '../../config/database'
 import { ConflictError, NotFoundError } from '../../shared/errors/app-error'
 import type {
@@ -40,7 +41,7 @@ export async function createWarehouse(input: CreateWarehouseInput) {
   const existing = await db.warehouse.findUnique({ where: { code: input.code } })
   if (existing) throw new ConflictError(`Warehouse with code '${input.code}' already exists`)
 
-  return db.warehouse.create({ data: input })
+  return db.warehouse.create({ data: input as Prisma.WarehouseCreateInput })
 }
 
 export async function updateWarehouse(id: string, input: UpdateWarehouseInput) {
@@ -80,7 +81,7 @@ export async function createZone(warehouseId: string, input: CreateZoneInput) {
   })
   if (existing) throw new ConflictError(`Zone '${input.code}' already exists in this warehouse`)
 
-  return db.zone.create({ data: { ...input, warehouseId } })
+  return db.zone.create({ data: { ...input, warehouseId } as Prisma.ZoneUncheckedCreateInput })
 }
 
 // ── Locations ────────────────────────────────────────────────────────────────
@@ -104,5 +105,5 @@ export async function createLocation(zoneId: string, input: CreateLocationInput)
   })
   if (existing) throw new ConflictError(`Location '${input.code}' already exists in this zone`)
 
-  return db.location.create({ data: { ...input, zoneId } })
+  return db.location.create({ data: { ...input, zoneId } as Prisma.LocationUncheckedCreateInput })
 }
