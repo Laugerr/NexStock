@@ -12,16 +12,28 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>
 
+const DEMO_ACCOUNTS = [
+  { label: 'Admin', email: 'admin@nexstock.com', password: 'Admin@123!' },
+  { label: 'Manager', email: 'manager@nexstock.com', password: 'Manager@123!' },
+  { label: 'Picker', email: 'picker@nexstock.com', password: 'Picker@123!' },
+]
+
 export function LoginPage() {
   const { mutate: login, isPending } = useLogin()
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
 
   const onSubmit = (data: LoginForm) => login(data)
+
+  const fillDemo = (email: string, password: string) => {
+    setValue('email', email, { shouldValidate: true })
+    setValue('password', password, { shouldValidate: true })
+  }
 
   return (
     <div className="rounded-2xl bg-white p-8 shadow-2xl">
@@ -56,12 +68,19 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <div className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
-        <p className="text-xs font-medium text-gray-500 mb-2">Demo credentials</p>
-        <div className="space-y-1 text-xs text-gray-600 font-mono">
-          <p>admin@nexstock.com / Admin@123!</p>
-          <p>manager@nexstock.com / Manager@123!</p>
-          <p>picker@nexstock.com / Picker@123!</p>
+      <div className="mt-6">
+        <p className="text-xs font-medium text-gray-400 text-center mb-3">— Try a demo account —</p>
+        <div className="grid grid-cols-3 gap-2">
+          {DEMO_ACCOUNTS.map(({ label, email, password }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => fillDemo(email, password)}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors"
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </div>

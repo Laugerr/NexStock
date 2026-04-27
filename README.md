@@ -26,13 +26,7 @@ NexStock is a full-stack WMS (Warehouse Management System) built as a **cybersec
 
 🌐 **[nexstock-wms.vercel.app](https://nexstock-wms.vercel.app)**
 
-> ⚠️ Demo accounts use public credentials. Rate-limited to 10 login attempts/min. Do not store real data.
-
-| 👤 Role | 📧 Email | 🔑 Password | 🔒 Access |
-|---------|----------|-------------|-----------|
-| Admin | admin@nexstock.com | Admin@123! | Full access |
-| Warehouse Manager | manager@nexstock.com | Manager@123! | Operations |
-| Picker | picker@nexstock.com | Picker@123! | Pick & pack only |
+> 🔐 Demo access available on request — use the **Try a demo account** buttons on the login page to explore each role (Admin, Manager, Picker). Rate-limited to 10 login attempts/min.
 
 ---
 

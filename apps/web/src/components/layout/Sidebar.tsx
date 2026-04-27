@@ -96,9 +96,10 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 px-6 py-4">
-        <p className="text-xs text-gray-400">NexStock WMS v0.1.0</p>
-        <p className="text-xs text-gray-400">Phase 1 — Core Foundation</p>
+      <div className="border-t border-gray-100 px-6 py-4 space-y-0.5">
+        <p className="text-xs font-medium text-gray-500">NexStock WMS</p>
+        <p className="text-xs text-gray-400">v0.1.0 · Core Foundation</p>
+        <p className="text-xs text-gray-400">© 2026 Lauger</p>
       </div>
     </aside>
   )
