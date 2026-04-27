@@ -65,7 +65,7 @@ export function useLocationInventory(locationId: string) {
 export function useBarcodeProductLookup() {
   return async (barcode: string) => {
     const { data } = await apiClient.get<ApiResponse<{ id: string; sku: string; name: string; unit: string } | null>>(
-      `/api/v1/products/lookup?barcode=${encodeURIComponent(barcode)}`,
+      `/api/v1/products/lookup?barcode=${encodeURIComponent(barcode)}&sku=${encodeURIComponent(barcode)}`,
     )
     return data.data
   }
