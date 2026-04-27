@@ -12,6 +12,7 @@ import {
   MoveRight,
   ShoppingCart,
   ScanBarcode,
+  X,
 } from 'lucide-react'
 
 const navGroups = [
@@ -53,15 +54,35 @@ const navGroups = [
   },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
+    <aside
+      className={clsx(
+        'fixed inset-y-0 left-0 z-30 flex h-full w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 ease-in-out',
+        'lg:relative lg:translate-x-0',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+      )}
+    >
       {/* Brand */}
-      <div className="flex h-16 items-center gap-3 border-b border-gray-100 px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <BoxesIcon className="h-5 w-5" />
+      <div className="flex h-16 items-center justify-between border-b border-gray-100 px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+            <BoxesIcon className="h-5 w-5" />
+          </div>
+          <span className="text-lg font-bold text-gray-900">NexStock</span>
         </div>
-        <span className="text-lg font-bold text-gray-900">NexStock</span>
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 lg:hidden"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -76,6 +97,7 @@ export function Sidebar() {
                 <li key={to}>
                   <NavLink
                     to={to}
+                    onClick={onClose}
                     className={({ isActive }) =>
                       clsx(
                         'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',

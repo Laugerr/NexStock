@@ -1,10 +1,14 @@
-import { ChevronDown, LogOut } from 'lucide-react'
+import { ChevronDown, LogOut, Menu } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useAuthStore } from '@/store/auth.store'
 import { useLogout } from '@/hooks/use-auth'
 import { clsx } from 'clsx'
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick: () => void
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuthStore()
   const logout = useLogout()
   const [open, setOpen] = useState(false)
@@ -25,8 +29,17 @@ export function Header() {
     : '?'
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
-      <div />
+    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
+      {/* Hamburger — mobile only */}
+      <button
+        onClick={onMenuClick}
+        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors lg:hidden"
+        aria-label="Open menu"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      <div className="hidden lg:block" />
 
       {/* User menu */}
       <div className="relative" ref={menuRef}>
