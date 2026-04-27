@@ -1,116 +1,186 @@
-# NexStock — Warehouse Management System
+<div align="center">
 
-> A production-grade Warehouse Management System built with Node.js, TypeScript, PostgreSQL, and React. Deployed serverless on Vercel + Supabase with a custom JWT + bcrypt + RBAC auth stack.
+# 📦 NexStock WMS
 
----
+**A production-grade Warehouse Management System built with security-first principles.**
 
-## Live Demo
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-nexstock--wms.vercel.app-black?style=for-the-badge&logo=vercel)](https://nexstock-wms.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![CodeQL](https://img.shields.io/badge/CodeQL-Security%20Extended-8B5CF6?style=for-the-badge&logo=github)](https://github.com/Laugerr/NexStock/security/code-scanning)
+[![Gitleaks](https://img.shields.io/badge/Gitleaks-Secret%20Scanning-red?style=for-the-badge)](https://github.com/gitleaks/gitleaks)
+[![Trivy](https://img.shields.io/badge/Trivy-CVE%20Scanning-1904DA?style=for-the-badge)](https://github.com/aquasecurity/trivy)
 
-**URL:** `https://nexstock.vercel.app` *(replace with your Vercel URL after deploying)*
-
-> **Demo accounts — public credentials, rate-limited, throwaway data only.**
-> These accounts exist for portfolio review. Do not store real data.
-> Login attempts are rate-limited to 10/min per IP.
-
-| Email | Password | Role |
-|-------|----------|------|
-| admin@nexstock.com | Admin@123! | Admin (full access) |
-| manager@nexstock.com | Manager@123! | Warehouse Manager |
-| picker@nexstock.com | Picker@123! | Picker |
+</div>
 
 ---
 
-## Tech Stack
+## 🎯 What is NexStock?
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Fastify + TypeScript (serverless via Vercel) |
-| ORM | Prisma 5 |
-| Database | Supabase Postgres (free tier) |
-| Frontend | React 18 + Vite + TypeScript |
-| Styling | Tailwind CSS |
-| State | Zustand + TanStack Query |
-| Monorepo | TurboRepo + npm workspaces |
-| Auth | Custom JWT + bcrypt (cost 12) + RBAC |
-| Validation | Zod (request bodies + env vars) |
-| Hosting | Vercel (serverless functions + static) |
+NexStock is a full-stack WMS (Warehouse Management System) built as a **cybersecurity portfolio project**. It's not just about moving stock — it's about demonstrating how to build a production-ready system with a proper security architecture: threat modeling, RBAC, tamper-evident audit trails, rate limiting without Redis, and automated vulnerability scanning baked into CI/CD.
+
+> Built by a **Cybersecurity Master's student** to showcase secure software engineering in a real-world full-stack context.
 
 ---
 
-## Architecture
+## 🚀 Live Demo
 
-### Deployed architecture (serverless)
+🌐 **[nexstock-wms.vercel.app](https://nexstock-wms.vercel.app)**
+
+> ⚠️ Demo accounts use public credentials. Rate-limited to 10 login attempts/min. Do not store real data.
+
+| 👤 Role | 📧 Email | 🔑 Password | 🔒 Access |
+|---------|----------|-------------|-----------|
+| Admin | admin@nexstock.com | Admin@123! | Full access |
+| Warehouse Manager | manager@nexstock.com | Manager@123! | Operations |
+| Picker | picker@nexstock.com | Picker@123! | Pick & pack only |
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+![Fastify](https://img.shields.io/badge/Fastify-000000?style=for-the-badge&logo=fastify&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+
+### Frontend
+![React](https://img.shields.io/badge/React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-433E38?style=for-the-badge)
+![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white)
+
+### Infrastructure & Security
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Turborepo](https://img.shields.io/badge/Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge)
+
+---
+
+## 🔐 Security Architecture
+
+> This section is the heart of the project. Every control was intentionally designed, not bolted on.
+
+### 🗺️ Threat Model (STRIDE)
+
+| Threat | Vector | Mitigation |
+|--------|--------|------------|
+| **Spoofing** | Credential stuffing on `/auth/login` | Postgres-backed rate limiting (10/min/IP), bcrypt cost 12 |
+| **Tampering** | Modifying stock movements post-creation | Immutable audit log, no UPDATE/DELETE on movements |
+| **Repudiation** | Denying warehouse actions | Tamper-evident audit trail: actor, IP, user-agent, before/after state |
+| **Information Disclosure** | JWT leakage, env secrets in repo | HS256 JWT, Gitleaks pre-commit hook, Zod env validation at startup |
+| **Denial of Service** | Flooding the serverless function | Global 120 req/min rate limit, 10s Vercel function timeout |
+| **Elevation of Privilege** | Horizontal/vertical privilege escalation | RBAC on every route, `action:resource` permission model |
+
+Full threat model: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md)
+
+---
+
+### 🛡️ Security Controls
+
+| Control | Implementation |
+|---------|---------------|
+| 🔑 **Authentication** | Custom JWT (HS256), 7-day expiry — no third-party auth provider |
+| 🔒 **Password Hashing** | bcrypt with cost factor 12 (~250ms hash time) |
+| 🚦 **Rate Limiting** | Postgres-backed atomic SQL upsert — stateless, no Redis needed |
+| 👮 **RBAC** | `action:resource` permission model, checked on every protected route |
+| 📋 **Audit Trail** | Every write operation logs actor, IP, user-agent, before/after state |
+| ✅ **Input Validation** | Zod on every request body, query string, and env variable |
+| 🌐 **CORS** | Allowlist only — wildcards blocked in production at startup |
+| 🪖 **Security Headers** | HSTS, CSP, X-Frame-Options DENY, nosniff, Referrer-Policy via Helmet |
+| 🔍 **Secret Scanning** | Gitleaks on every push + local pre-commit hook |
+| 🦠 **CVE Scanning** | Trivy filesystem scan on every PR → GitHub Security tab |
+| 🔬 **SAST** | CodeQL security-extended queries on every PR |
+| 📦 **Dependency Updates** | Dependabot weekly for npm + GitHub Actions |
+| ⚙️ **Env Hardening** | Zod schema validates all env vars at startup — invalid config exits immediately |
+
+Full technical reference: [`docs/SECURITY_CONTROLS.md`](docs/SECURITY_CONTROLS.md)
+
+---
+
+## 🏗️ Architecture
+
+### Serverless Deploy Flow
 
 ```
-Browser
-  │
-  ├── GET /*            → Vercel CDN (React SPA, static)
-  └── POST /api/v1/*    → Vercel Serverless Function
-                              │
-                        Fastify (inject adapter)
-                              │
-                    ┌─────────┴──────────┐
-                    │                    │
-               Route handlers       Supabase Postgres
-               Auth middleware       (Prisma, pooler)
-               RBAC checks
-               Audit logging
-               Zod validation
+🌍 Browser
+    │
+    ├── GET  /*          ──▶  Vercel CDN  (React SPA, cached at edge)
+    │
+    └── ANY  /api/v1/*   ──▶  Vercel Serverless Function
+                                    │
+                              🚀 Fastify (inject adapter)
+                                    │
+                      ┌─────────────┴─────────────┐
+                      │                           │
+               🛡️ Plugins                   🗄️ Supabase Postgres
+               ├── JWT auth                  (Prisma ORM, PgBouncer)
+               ├── CORS allowlist
+               ├── Helmet headers
+               ├── Rate limiting
+               └── Zod validation
+                      │
+               📦 Domain Modules
+               ├── auth       ├── inventory
+               ├── warehouses ├── stock-movements
+               ├── products   ├── grn
+               ├── users      ├── cycle-count
+               ├── audit      └── reports
 ```
 
-### Why serverless, not a long-running server
+### Why Postgres rate limiting instead of Redis?
 
-The README previously described this as a "modular monolith". The domain structure is still modular (one folder per domain, service/route separation), but the **runtime** changed:
+On Vercel's free tier, there's no persistent in-memory store. Instead of adding a paid Redis instance, the rate limiter uses an **atomic SQL upsert**:
 
-- **Before:** Fastify listening on a port, persistent process, Redis for rate limiting
-- **After:** Fastify wrapped with an `inject()` adapter, running as a Vercel serverless function, Postgres-backed rate limiting
+```sql
+INSERT INTO rate_limits (key, count, reset_at)
+VALUES ($1, 1, NOW() + INTERVAL '1 minute')
+ON CONFLICT (key) DO UPDATE
+  SET count = CASE
+    WHEN rate_limits.reset_at < NOW() THEN 1
+    ELSE rate_limits.count + 1
+  END,
+  reset_at = CASE
+    WHEN rate_limits.reset_at < NOW() THEN NOW() + INTERVAL '1 minute'
+    ELSE rate_limits.reset_at
+  END
+RETURNING count, reset_at;
+```
 
-The domain modules (`auth`, `warehouses`, `products`, `inventory`, `stock-movements`, `audit`) are unchanged. The refactor only touched the runtime boundary — a single `api/index.ts` entry point that initialises Fastify once per warm instance and forwards Vercel requests via `fastify.inject()`.
+Single query, no race conditions, no extra infrastructure. See [`src/plugins/rate-limit.ts`](apps/api/src/plugins/rate-limit.ts).
 
-### Monorepo structure
+### Monorepo Structure
 
 ```
-nexstock/
-├── apps/
-│   ├── api/                        # Fastify backend
-│   │   ├── api/
-│   │   │   └── index.ts            # Vercel serverless entry point
-│   │   ├── prisma/
-│   │   │   ├── schema.prisma       # Database schema
-│   │   │   ├── seed.ts             # Seed data
-│   │   │   └── migrations/         # Prisma migration history
+NexStock/
+├── 📁 apps/
+│   ├── 🚀 api/                     # Fastify backend
+│   │   ├── api/index.ts            # Vercel serverless entry point
+│   │   ├── prisma/                 # Schema, migrations, seed
 │   │   └── src/
-│   │       ├── config/             # Env validation, DB
-│   │       ├── plugins/            # CORS, JWT, helmet, rate-limit
-│   │       ├── shared/             # Errors, middleware, utils, types
-│   │       └── modules/
-│   │           ├── auth/           # Login, register, JWT, RBAC
-│   │           ├── users/          # User management
-│   │           ├── warehouses/     # Warehouses, zones, locations
-│   │           ├── products/       # Product catalog + SKU
-│   │           ├── inventory/      # Stock levels
-│   │           ├── stock-movements/# GRN, picks, transfers, adjustments
-│   │           ├── grn/            # Goods receipt notes
-│   │           ├── cycle-count/    # Cycle counting
-│   │           ├── audit/          # Audit log
-│   │           ├── reports/        # Reporting
-│   │           └── health/         # Health check
-│   └── web/                        # React + Vite frontend
-│       ├── vercel.json             # SPA routing + security headers
+│   │       ├── config/             # Env validation, DB singleton
+│   │       ├── plugins/            # CORS, JWT, Helmet, rate-limit
+│   │       ├── shared/             # Errors, middleware, utils
+│   │       └── modules/            # Domain modules (auth, products…)
+│   └── 🌐 web/                     # React + Vite frontend
+│       ├── vercel.json             # SPA rewrite + security headers
 │       └── src/
 │           ├── components/         # UI components + layout
 │           ├── hooks/              # TanStack Query hooks
-│           ├── layouts/            # AppLayout, AuthLayout
-│           ├── lib/                # API client, query client
 │           ├── pages/              # Route-level pages
-│           ├── router/             # React Router config
 │           ├── store/              # Zustand auth store
-│           └── types/              # Shared API types
-├── packages/
+│           └── router/             # React Router config
+├── 📁 packages/
 │   ├── tsconfig/                   # Shared TypeScript configs
 │   └── eslint-config/              # Shared ESLint config
-├── vercel.json                     # Root: single-project deploy config
-├── .github/
+├── 📁 docs/
+│   ├── THREAT_MODEL.md             # STRIDE analysis
+│   └── SECURITY_CONTROLS.md       # Deep technical reference
+├── 📁 .github/
 │   ├── workflows/                  # CI, CodeQL, Gitleaks, Trivy
 │   └── dependabot.yml
 └── turbo.json
@@ -118,169 +188,163 @@ nexstock/
 
 ---
 
-## Security Controls
+## 🗺️ Roadmap
 
-| Control | Implementation | Code |
-|---------|---------------|------|
-| Authentication | JWT (HS256), 7-day expiry, `Authorization: Bearer` header | [`src/plugins/jwt.ts`](apps/api/src/plugins/jwt.ts) |
-| Password hashing | bcrypt, cost factor 12 | [`src/shared/utils/password.ts`](apps/api/src/shared/utils/password.ts) |
-| RBAC | Permission check on every protected route (`action:resource`) | [`src/shared/middleware/authorize.ts`](apps/api/src/shared/middleware/authorize.ts) |
-| Rate limiting | Postgres-backed, atomic SQL upsert — 10/min login, 5/min register, 120/min global | [`src/plugins/rate-limit.ts`](apps/api/src/plugins/rate-limit.ts) |
-| Audit logging | Every state-changing action logs actor, IP, user-agent, before/after | [`src/modules/audit/audit.service.ts`](apps/api/src/modules/audit/audit.service.ts) |
-| Input validation | Zod on every request body and query string | All `*.schema.ts` files |
-| CORS | Env-configured origin allowlist, no wildcards in production | [`src/plugins/cors.ts`](apps/api/src/plugins/cors.ts) |
-| Security headers | HSTS, CSP, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy | [`src/server.ts`](apps/api/src/server.ts) |
-| Env validation | Zod schema at startup; invalid config exits immediately | [`src/config/env.ts`](apps/api/src/config/env.ts) |
-| Secret scanning | Gitleaks on every push/PR + local pre-commit hook | [`.gitleaks.toml`](.gitleaks.toml) |
-| CVE scanning | Trivy (filesystem mode) on every PR, results in Security tab | [`.github/workflows/trivy.yml`](.github/workflows/trivy.yml) |
-| CodeQL | OWASP Top 10 + security-extended queries on every PR | [`.github/workflows/codeql.yml`](.github/workflows/codeql.yml) |
-
-Full technical detail: [`docs/SECURITY_CONTROLS.md`](docs/SECURITY_CONTROLS.md)  
-Threat model: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md)
+| Version | Status | Scope |
+|---------|--------|-------|
+| **v0.1.0** | ✅ Live | Core WMS — auth, RBAC, warehouses, products, inventory, GRN, pick-pack, cycle count |
+| **v0.2.0** | 🔜 Next | Security hardening — JWT revocation, account lockout, audit log UI, session management |
+| **v0.3.0** | 📋 Planned | Observability — anomaly detection, security event dashboard, audit export |
+| **v0.4.0** | 📋 Planned | Advanced WMS — multi-warehouse transfers, supplier management, low stock alerts |
 
 ---
 
-## Deployment
+## 🚀 Deploy Your Own
 
 ### Prerequisites
-
-- GitHub account (repo must be pushed)
 - [Supabase](https://supabase.com) account (free tier)
 - [Vercel](https://vercel.com) account (free tier)
 
-### Step 1 — Supabase
+### 1️⃣ Supabase Setup
 
-1. Create a new Supabase project. Save the database password.
+1. Create a new Supabase project, save the database password
 2. In **Connect → ORMs**, copy both URLs:
-   - `DATABASE_URL` — pooler URL (port 6543). Append `?pgbouncer=true&connection_limit=1`
-   - `DIRECT_URL` — direct URL (port 5432). For local migrations only.
-3. Locally, create `apps/api/.env` with both URLs plus a generated `JWT_SECRET`:
+   - `DATABASE_URL` — pooler URL (port 6543) + append `?pgbouncer=true&connection_limit=1`
+   - `DIRECT_URL` — direct URL (port 5432), for migrations only
+3. Generate a JWT secret:
    ```bash
-   openssl rand -base64 32   # use this as JWT_SECRET
+   openssl rand -base64 32
    ```
-4. Run migrations and seed:
+4. Create `apps/api/.env` and run:
    ```bash
    cd apps/api
    npx prisma migrate deploy
    npm run db:seed
    ```
 
-### Step 2 — Vercel (API project)
+### 2️⃣ Vercel — API Project
 
-1. Go to [vercel.com/new](https://vercel.com/new) → Import your GitHub repo
-2. Configure:
-   - **Root Directory:** `apps/api`
-   - **Framework Preset:** Other
-   - **Build Command:** *(leave empty)*
-   - **Output Directory:** *(leave empty)*
-3. Add environment variables (**use Sensitive/Secret type for JWT_SECRET**):
+1. [vercel.com/new](https://vercel.com/new) → Import repo
+2. **Root Directory:** `apps/api` · **Framework:** Other
+3. Environment variables:
 
    | Variable | Value |
    |----------|-------|
    | `NODE_ENV` | `production` |
-   | `DATABASE_URL` | your Supabase pooler URL |
-   | `JWT_SECRET` | your generated secret |
+   | `DATABASE_URL` | Supabase pooler URL |
+   | `DIRECT_URL` | Supabase direct URL |
+   | `JWT_SECRET` | Your generated secret (mark as sensitive) |
    | `JWT_EXPIRES_IN` | `7d` |
-   | `CORS_ORIGINS` | your web app Vercel URL (set after step 3) |
+   | `CORS_ORIGINS` | Your web Vercel URL (add after step 3) |
    | `LOG_LEVEL` | `warn` |
 
-4. Deploy. Note the API URL (e.g. `https://nexstock-api.vercel.app`).
+4. Deploy → note the API URL
 
-### Step 3 — Vercel (Web project)
+### 3️⃣ Vercel — Web Project
 
-1. Go to [vercel.com/new](https://vercel.com/new) → Import the same repo
-2. Configure:
-   - **Root Directory:** `apps/web`
-   - **Framework Preset:** Vite
-3. Add environment variable:
+1. [vercel.com/new](https://vercel.com/new) → Import same repo
+2. **Root Directory:** `apps/web` · **Framework:** Vite
+3. Add `VITE_API_URL` = your API URL from step 2
+4. Deploy → note the web URL
 
-   | Variable | Value |
-   |----------|-------|
-   | `VITE_API_URL` | your API Vercel URL from step 2 |
+### 4️⃣ Wire CORS
 
-4. Deploy. Note the web URL.
+Back in the API project → Settings → Env Variables → set `CORS_ORIGINS` to the web URL → Redeploy.
 
-### Step 4 — Wire CORS
-
-Go back to the **API** Vercel project → Settings → Environment Variables.  
-Update `CORS_ORIGINS` to the web app URL from step 3. Redeploy.
-
-### Step 5 — Verify
+### 5️⃣ Verify
 
 ```bash
 # Health check
-curl https://nexstock-api.vercel.app/api/v1/health
+curl https://your-api.vercel.app/api/v1/health
 
 # Login
-curl -X POST https://nexstock-api.vercel.app/api/v1/auth/login \
+curl -X POST https://your-api.vercel.app/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@nexstock.com","password":"Admin@123!"}'
 ```
 
 ---
 
-## Local Development
-
-### Prerequisites
-- Node.js >= 20
-- Docker Desktop (for local Postgres)
-
-### Setup
+## 💻 Local Development
 
 ```bash
+# Clone & install
 git clone https://github.com/Laugerr/NexStock.git
 cd NexStock
 npm install
 
-# Copy env files
+# Setup env files
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
-
-# Edit apps/api/.env — set DATABASE_URL and JWT_SECRET
+# Edit apps/api/.env with your DATABASE_URL and JWT_SECRET
 
 # Start local Postgres
 docker compose up -d
 
-# Run migrations and seed
-cd apps/api
-npx prisma migrate dev --name init
-npm run db:seed
-cd ../..
+# Migrate & seed
+cd apps/api && npx prisma migrate dev --name init && npm run db:seed && cd ../..
 
-# Start dev servers
+# Start everything
 npm run dev
 ```
 
-**API:** http://localhost:3001  
-**Web:** http://localhost:5173  
-**Health:** http://localhost:3001/api/v1/health
+| Service | URL |
+|---------|-----|
+| 🌐 Web | http://localhost:5173 |
+| 🚀 API | http://localhost:3001 |
+| ❤️ Health | http://localhost:3001/api/v1/health |
+
+### Useful Commands
+
+```bash
+npm run dev          # Start all apps
+npm run build        # Build all apps
+npm run typecheck    # Type-check all apps
+npm run lint         # Lint all apps
+
+# Database (from apps/api)
+npm run db:migrate   # Run pending migrations
+npm run db:seed      # Seed demo data
+npm run db:studio    # Open Prisma Studio
+npm run db:reset     # Reset DB + re-migrate
+```
 
 ---
 
-## API Reference
+## 📡 API Reference
 
-Base URL: `/api/v1`
+Base URL: `/api/v1` · All protected routes require `Authorization: Bearer <token>`
 
-### Auth
+<details>
+<summary>🔑 Auth</summary>
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/auth/login` | — | Sign in, returns JWT |
 | GET | `/auth/me` | JWT | Current user + permissions |
 | POST | `/auth/register` | Admin | Create user |
 
-### Warehouses
+</details>
+
+<details>
+<summary>🏭 Warehouses</summary>
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/warehouses` | JWT | List warehouses |
 | POST | `/warehouses` | Admin/Manager | Create warehouse |
-| GET | `/warehouses/:id` | JWT | Get warehouse with zones |
+| GET | `/warehouses/:id` | JWT | Warehouse with zones |
 | PATCH | `/warehouses/:id` | Admin/Manager | Update warehouse |
 | GET | `/warehouses/:id/zones` | JWT | List zones |
 | POST | `/warehouses/:id/zones` | Admin/Manager | Create zone |
 | GET | `/warehouses/zones/:zoneId/locations` | JWT | List locations |
 | POST | `/warehouses/zones/:zoneId/locations` | Admin/Manager | Create location |
 
-### Products
+</details>
+
+<details>
+<summary>📦 Products</summary>
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/products` | JWT | List products |
@@ -289,80 +353,46 @@ Base URL: `/api/v1`
 | PATCH | `/products/:id` | Admin/Manager | Update product |
 | GET | `/products/categories` | JWT | All categories |
 
-### Inventory
+</details>
+
+<details>
+<summary>📊 Inventory & Movements</summary>
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/inventory` | JWT | Current stock levels |
 | GET | `/inventory/summary` | JWT | Dashboard stats |
-
-### Stock Movements
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
 | GET | `/stock-movements` | JWT | List movements |
 | POST | `/stock-movements` | JWT | Record movement |
 | GET | `/stock-movements/:id` | JWT | Movement detail |
 
-### Users
+</details>
+
+<details>
+<summary>👥 Users & Audit</summary>
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/users` | Admin | List users |
-| GET | `/users/:id` | Admin | User detail |
 | PATCH | `/users/:id` | Admin | Update user |
-| GET | `/users/roles` | JWT | Available roles |
-
-### Audit
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
 | GET | `/audit` | Admin | Audit log |
-
-### Health
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
 | GET | `/api/v1/health` | — | Version, uptime, DB status |
 
----
-
-## Development Commands
-
-```bash
-npm run dev              # Start all apps
-npm run build            # Build all apps
-npm run typecheck        # Type-check all apps
-npm run lint             # Lint all apps
-npm run format           # Format with Prettier
-
-# In apps/api:
-npm run db:migrate       # Run pending migrations
-npm run db:seed          # Seed demo data
-npm run db:studio        # Open Prisma Studio
-npm run db:reset         # Reset DB + re-migrate
-```
+</details>
 
 ---
 
-## Free-Tier Limitations
+## ⚠️ Free-Tier Considerations
 
 | Limitation | Detail |
 |-----------|--------|
-| Cold starts | First request after inactivity: ~500–1500 ms. The frontend retries automatically. |
-| Supabase pause | Free Supabase projects pause after 7 days of inactivity. Resume from the dashboard. |
-| Vercel function timeout | Max 10 s execution per request on hobby plan. |
-| Connections | Supabase free tier: ~60 concurrent connections. Mitigated by `connection_limit=1` in the pooler URL. |
-| No Redis | Rate limiting uses Postgres. Slightly higher latency per request than in-memory. |
+| 🥶 Cold starts | ~500–1500ms after inactivity. Frontend retries automatically with exponential backoff. |
+| 😴 Supabase pause | Free projects pause after 7 days of inactivity. Resume from the Supabase dashboard. |
+| ⏱️ Function timeout | Max 10s per request on Vercel hobby plan. |
+| 🔌 Connections | ~60 concurrent on Supabase free tier. Mitigated by `connection_limit=1` in the pooler URL. |
 
 ---
 
-## Phase Roadmap
+## 📄 License
 
-| Phase | Status | Scope |
-|-------|--------|-------|
-| **Phase 1 — Core Foundation** | ✅ Complete | Auth, RBAC, warehouses, products, inventory, stock movements, audit |
-| Phase 2 — Business Operations | Planned | POs, sales orders, wave picking, supplier portal, notifications |
-| Phase 3 — Advanced Operations | Planned | Multi-warehouse, cross-docking, ERP integrations, SLA tracking |
-| Phase 4 — Pro / Platform | Planned | Robotics, AI optimisation, IoT, blockchain traceability |
-
----
-
-## License
-
-MIT
+MIT © [Laugerr](https://github.com/Laugerr)
