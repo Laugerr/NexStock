@@ -17,8 +17,8 @@
     "db:seed": "turbo db:seed"
   },
   "devDependencies": {
-    "turbo": "^2.3.3",
-    "prettier": "^3.3.3"
+    "turbo": "^2.9.6",
+    "prettier": "^3.8.3"
   },
   "packageManager": "npm@11.12.1",
   "engines": {
