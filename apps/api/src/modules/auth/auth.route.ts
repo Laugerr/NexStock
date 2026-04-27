@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { loginSchema, registerSchema } from './auth.schema'
-import { getCurrentUser, loginUser, registerUser } from './auth.service'
+import { getCurrentUser, loginUser, registerUser, revokeToken } from './auth.service'
 import { createAuditLog } from '../audit/audit.service'
 import { authorize } from '../../shared/middleware/authorize'
 import { successResponse } from '../../shared/utils/response'
@@ -44,6 +44,23 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.code(201).send(successResponse(user))
     },
   )
+
+  // POST /api/v1/auth/logout
+  fastify.post('/logout', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { jti, sub, exp } = request.user
+    const expiresAt = exp ? new Date(exp * 1000) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    await revokeToken(jti, sub, expiresAt)
+
+    await createAuditLog({
+      userId: sub,
+      action: 'LOGOUT',
+      resource: 'auth',
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+    })
+
+    return reply.code(200).send(successResponse({ message: 'Logged out successfully' }))
+  })
 
   // GET /api/v1/auth/me
   fastify.get('/me', { preHandler: [fastify.authenticate] }, async (request, reply) => {

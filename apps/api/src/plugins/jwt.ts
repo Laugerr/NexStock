@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import fjwt from '@fastify/jwt'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { env } from '../config/env'
+import { db } from '../config/database'
 import { UnauthorizedError } from '../shared/errors/app-error'
 
 async function jwtPlugin(fastify: FastifyInstance) {
@@ -19,6 +20,13 @@ async function jwtPlugin(fastify: FastifyInstance) {
         await request.jwtVerify()
       } catch {
         throw new UnauthorizedError('Invalid or expired token')
+      }
+
+      // Check token blacklist (revoked tokens)
+      const { jti } = request.user
+      if (jti) {
+        const revoked = await db.tokenBlacklist.findUnique({ where: { jti } })
+        if (revoked) throw new UnauthorizedError('Token has been revoked')
       }
     },
   )

@@ -239,6 +239,19 @@ model RateLimit {
   @@map("rate_limits")
 }
 
+// ==================== TOKEN BLACKLIST ====================
+
+model TokenBlacklist {
+  id        String   @id @default(uuid())
+  jti       String   @unique // JWT ID — one entry per revoked token
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at") // Mirrors token expiry for cleanup
+  revokedAt DateTime @default(now()) @map("revoked_at")
+
+  @@index([expiresAt])
+  @@map("token_blacklist")
+}
+
 // ==================== AUDIT ====================
 
 model AuditLog {

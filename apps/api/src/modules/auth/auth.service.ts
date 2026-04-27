@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { FastifyInstance } from 'fastify'
 import { db } from '../../config/database'
 import { comparePasswords, hashPassword } from '../../shared/utils/password'
@@ -29,6 +30,7 @@ export async function loginUser(
     email: user.email,
     roleId: user.roleId,
     roleName: user.role.name,
+    jti: randomUUID(),
   })
 
   return {
@@ -41,6 +43,12 @@ export async function loginUser(
       role: user.role.name,
     },
   }
+}
+
+export async function revokeToken(jti: string, userId: string, expiresAt: Date) {
+  await db.tokenBlacklist.create({ data: { jti, userId, expiresAt } })
+  // Fire-and-forget cleanup of expired entries
+  db.tokenBlacklist.deleteMany({ where: { expiresAt: { lt: new Date() } } }).catch(() => {})
 }
 
 export async function registerUser(input: RegisterInput) {

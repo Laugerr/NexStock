@@ -29,7 +29,12 @@ export function useLogout() {
   const { logout } = useAuthStore()
   const navigate = useNavigate()
 
-  return () => {
+  return async () => {
+    try {
+      await apiClient.post('/api/v1/auth/logout')
+    } catch {
+      // Logout locally even if the API call fails
+    }
     logout()
     navigate('/login')
     toast.success('Logged out successfully')
