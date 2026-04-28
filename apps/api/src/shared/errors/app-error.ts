@@ -46,3 +46,17 @@ export class BadRequestError extends AppError {
     super(message, 400, 'BAD_REQUEST')
   }
 }
+
+export class AccountLockedError extends AppError {
+  public readonly retryAfterSeconds: number
+
+  constructor(retryAfterSeconds: number) {
+    const minutes = Math.ceil(retryAfterSeconds / 60)
+    super(
+      `Account locked due to too many failed login attempts. Try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`,
+      423,
+      'ACCOUNT_LOCKED',
+    )
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}

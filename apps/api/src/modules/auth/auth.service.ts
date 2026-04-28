@@ -2,8 +2,11 @@ import { randomUUID } from 'crypto'
 import { FastifyInstance } from 'fastify'
 import { db } from '../../config/database'
 import { comparePasswords, hashPassword } from '../../shared/utils/password'
-import { ConflictError, NotFoundError, UnauthorizedError } from '../../shared/errors/app-error'
+import { AccountLockedError, ConflictError, NotFoundError, UnauthorizedError } from '../../shared/errors/app-error'
 import type { RegisterInput } from './auth.schema'
+
+const MAX_FAILED_ATTEMPTS = 5
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
 export async function loginUser(
   fastify: FastifyInstance,
@@ -20,10 +23,34 @@ export async function loginUser(
     throw new UnauthorizedError('Invalid email or password')
   }
 
+  // Check account lockout
+  if (user.lockedUntil && user.lockedUntil > new Date()) {
+    const retryAfterSeconds = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000)
+    throw new AccountLockedError(retryAfterSeconds)
+  }
+
   const isValid = await comparePasswords(password, user.passwordHash)
   if (!isValid) {
+    const newFailedAttempts = user.failedLoginAttempts + 1
+    const shouldLock = newFailedAttempts >= MAX_FAILED_ATTEMPTS
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: newFailedAttempts,
+        lockedUntil: shouldLock ? new Date(Date.now() + LOCKOUT_DURATION_MS) : undefined,
+      },
+    })
+    if (shouldLock) {
+      throw new AccountLockedError(LOCKOUT_DURATION_MS / 1000)
+    }
     throw new UnauthorizedError('Invalid email or password')
   }
+
+  // Successful login — reset lockout state
+  await db.user.update({
+    where: { id: user.id },
+    data: { failedLoginAttempts: 0, lockedUntil: null },
+  })
 
   const token = fastify.jwt.sign({
     sub: user.id,

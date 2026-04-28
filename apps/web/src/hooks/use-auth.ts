@@ -22,6 +22,10 @@ export function useLogin() {
       toast.success(`Welcome back, ${data.user.firstName}!`)
       navigate('/dashboard')
     },
+    onError: (error: any) => {
+      const message = error?.response?.data?.error?.message ?? 'Login failed. Please try again.'
+      toast.error(message, { duration: 6000 })
+    },
   })
 }
 

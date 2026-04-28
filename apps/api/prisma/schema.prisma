@@ -22,9 +22,11 @@ model User {
   passwordHash String  @map("password_hash")
   firstName    String  @map("first_name")
   lastName     String  @map("last_name")
-  isActive     Boolean @default(true) @map("is_active")
-  roleId       String  @map("role_id")
-  role         Role    @relation(fields: [roleId], references: [id])
+  isActive              Boolean   @default(true) @map("is_active")
+  failedLoginAttempts   Int       @default(0) @map("failed_login_attempts")
+  lockedUntil           DateTime? @map("locked_until")
+  roleId                String    @map("role_id")
+  role                  Role      @relation(fields: [roleId], references: [id])
 
   stockMovements StockMovement[]
   auditLogs      AuditLog[]
