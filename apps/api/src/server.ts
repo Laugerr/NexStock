@@ -21,6 +21,7 @@ import { grnRoutes } from './modules/grn/grn.route'
 import { cycleCountRoutes } from './modules/cycle-count/cycle-count.route'
 import { auditRoutes } from './modules/audit/audit.route'
 import { reportRoutes } from './modules/reports/reports.route'
+import { securityRoutes } from './modules/security/security.route'
 
 export async function buildServer() {
   const app = Fastify({
@@ -81,6 +82,7 @@ export async function buildServer() {
       await v1.register(cycleCountRoutes, { prefix: '/cycle-count' })
       await v1.register(auditRoutes, { prefix: '/audit' })
       await v1.register(reportRoutes, { prefix: '/reports' })
+      await v1.register(securityRoutes, { prefix: '/security' })
     },
     { prefix: '/api/v1' },
   )

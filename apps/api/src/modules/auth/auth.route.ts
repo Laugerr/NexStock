@@ -2,6 +2,8 @@ import { FastifyInstance } from 'fastify'
 import { loginSchema, registerSchema } from './auth.schema'
 import { getCurrentUser, loginUser, registerUser, revokeToken } from './auth.service'
 import { createAuditLog } from '../audit/audit.service'
+import { detectAfterHours, detectBruteForce } from '../security/security.service'
+import { AccountLockedError, UnauthorizedError } from '../../shared/errors/app-error'
 import { authorize } from '../../shared/middleware/authorize'
 import { successResponse } from '../../shared/utils/response'
 
@@ -9,18 +11,39 @@ export async function authRoutes(fastify: FastifyInstance) {
   // POST /api/v1/auth/login
   fastify.post('/login', async (request, reply) => {
     const body = loginSchema.parse(request.body)
-    const result = await loginUser(fastify, body.email, body.password)
 
-    await createAuditLog({
-      userId: result.user.id,
-      action: 'LOGIN',
-      resource: 'auth',
-      after: { email: body.email },
-      ipAddress: request.ip,
-      userAgent: request.headers['user-agent'],
-    })
+    try {
+      const result = await loginUser(fastify, body.email, body.password)
 
-    return reply.code(200).send(successResponse(result))
+      await createAuditLog({
+        userId: result.user.id,
+        action: 'LOGIN',
+        resource: 'auth',
+        after: { email: body.email },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
+
+      // Fire-and-forget after-hours detection
+      detectAfterHours(result.user.id, request.ip).catch(() => {})
+
+      return reply.code(200).send(successResponse(result))
+    } catch (error) {
+      if (error instanceof UnauthorizedError || error instanceof AccountLockedError) {
+        // Log failed attempt for brute-force detection
+        createAuditLog({
+          action: 'FAILED_LOGIN',
+          resource: 'auth',
+          after: { email: body.email },
+          ipAddress: request.ip,
+          userAgent: request.headers['user-agent'],
+        }).catch(() => {})
+
+        // Fire-and-forget brute-force detection
+        detectBruteForce(request.ip).catch(() => {})
+      }
+      throw error
+    }
   })
 
   // POST /api/v1/auth/register  (admin-only in production)

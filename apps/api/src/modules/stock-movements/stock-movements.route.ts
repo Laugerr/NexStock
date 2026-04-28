@@ -7,6 +7,7 @@ import {
 } from './stock-movements.service'
 import { authorize } from '../../shared/middleware/authorize'
 import { createAuditLog } from '../audit/audit.service'
+import { detectRapidAdjustments } from '../security/security.service'
 import { buildPaginationArgs, paginatedResponse, successResponse } from '../../shared/utils/response'
 
 export async function stockMovementRoutes(fastify: FastifyInstance) {
@@ -62,6 +63,10 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
         },
         ipAddress: request.ip,
       })
+
+      if (body.type === 'ADJUSTMENT') {
+        detectRapidAdjustments(request.user.sub).catch(() => {})
+      }
 
       return reply.code(201).send(successResponse(movement))
     },

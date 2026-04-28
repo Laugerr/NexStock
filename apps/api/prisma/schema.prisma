@@ -254,6 +254,27 @@ model TokenBlacklist {
   @@map("token_blacklist")
 }
 
+// ==================== SECURITY EVENTS ====================
+
+model SecurityEvent {
+  id          String    @id @default(uuid())
+  type        String    // BRUTE_FORCE | ACCOUNT_LOCKED | RAPID_ADJUSTMENT | AFTER_HOURS
+  severity    String    // LOW | MEDIUM | HIGH | CRITICAL
+  userId      String?   @map("user_id")
+  ipAddress   String?   @map("ip_address")
+  description String
+  metadata    Json?
+  resolvedAt  DateTime? @map("resolved_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([type])
+  @@index([severity])
+  @@index([resolvedAt])
+  @@index([createdAt])
+  @@map("security_events")
+}
+
 // ==================== AUDIT ====================
 
 model AuditLog {

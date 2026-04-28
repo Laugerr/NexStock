@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify'
 import { db } from '../../config/database'
 import { comparePasswords, hashPassword } from '../../shared/utils/password'
 import { AccountLockedError, ConflictError, NotFoundError, UnauthorizedError } from '../../shared/errors/app-error'
+import { detectAccountLocked } from '../security/security.service'
 import type { RegisterInput } from './auth.schema'
 
 const MAX_FAILED_ATTEMPTS = 5
@@ -41,6 +42,7 @@ export async function loginUser(
       },
     })
     if (shouldLock) {
+      detectAccountLocked(user.id).catch(() => {})
       throw new AccountLockedError(LOCKOUT_DURATION_MS / 1000)
     }
     throw new UnauthorizedError('Invalid email or password')
