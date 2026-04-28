@@ -24,16 +24,25 @@ const actionVariant: Record<string, 'success' | 'warning' | 'danger' | 'info' | 
   UPDATE: 'warning',
   DELETE: 'danger',
   LOGIN: 'info',
+  ADJUSTMENT: 'warning',
 }
+
+const ACTIONS = ['LOGIN', 'CREATE', 'UPDATE', 'DELETE', 'ADJUSTMENT']
+const RESOURCES = ['warehouse', 'product', 'inventory', 'stock-movement', 'user', 'audit-log']
 
 export function AuditPage() {
   const [page, setPage] = useState(1)
+  const [actionFilter, setActionFilter] = useState('')
+  const [resourceFilter, setResourceFilter] = useState('')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['audit-logs', page],
+    queryKey: ['audit-logs', page, actionFilter, resourceFilter],
     queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), limit: '25' })
+      if (actionFilter) params.set('action', actionFilter)
+      if (resourceFilter) params.set('resource', resourceFilter)
       const { data } = await apiClient.get<PaginatedResponse<AuditLog>>(
-        `/api/v1/audit?page=${page}&limit=25`,
+        `/api/v1/audit?${params.toString()}`,
       )
       return data
     },
@@ -41,25 +50,46 @@ export function AuditPage() {
 
   const totalPages = data?.meta.totalPages ?? 1
 
+  const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setter(e.target.value)
+    setPage(1)
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Audit Log</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Complete audit trail of all system actions
-        </p>
+        <p className="mt-1 text-sm text-gray-500">Complete audit trail of all system actions</p>
       </div>
 
       <Card>
         <CardHeader>
-          <p className="text-sm font-medium text-gray-500">
-            {data ? `${data.meta.total} events` : ''}
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm font-medium text-gray-500 mr-auto">
+              {data ? `${data.meta.total} event${data.meta.total !== 1 ? 's' : ''}` : ''}
+            </p>
+            <select
+              value={actionFilter}
+              onChange={handleFilterChange(setActionFilter)}
+              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
+            >
+              <option value="">All actions</option>
+              {ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <select
+              value={resourceFilter}
+              onChange={handleFilterChange(setResourceFilter)}
+              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
+            >
+              <option value="">All resources</option>
+              {RESOURCES.map((r) => <option key={r} value={r} className="capitalize">{r}</option>)}
+            </select>
+          </div>
         </CardHeader>
         {isLoading ? (
           <Spinner />
         ) : !data?.data.length ? (
-          <EmptyState icon={ClipboardList} title="No audit events yet" />
+          <EmptyState icon={ClipboardList} title="No audit events found" />
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -79,13 +109,13 @@ export function AuditPage() {
                       </td>
                       <td className="px-6 py-3.5 font-medium text-gray-700 capitalize">{log.resource}</td>
                       <td className="px-6 py-3.5 font-mono text-xs text-gray-500">
-                        {log.resourceId ? log.resourceId.substring(0, 8) + '...' : '—'}
+                        {log.resourceId ? log.resourceId.substring(0, 8) + '…' : '—'}
                       </td>
                       <td className="px-6 py-3.5 text-gray-600">
                         {log.user ? `${log.user.firstName} ${log.user.lastName}` : 'System'}
                       </td>
                       <td className="px-6 py-3.5 font-mono text-xs text-gray-400">{log.ipAddress ?? '—'}</td>
-                      <td className="px-6 py-3.5 text-gray-400">{formatDistanceToNow(log.createdAt)}</td>
+                      <td className="px-6 py-3.5 text-gray-400 whitespace-nowrap">{formatDistanceToNow(log.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>

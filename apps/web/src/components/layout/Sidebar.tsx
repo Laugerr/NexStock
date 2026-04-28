@@ -120,7 +120,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Footer */}
       <div className="border-t border-gray-100 px-6 py-4 space-y-0.5">
         <p className="text-xs font-medium text-gray-500">NexStock WMS</p>
-        <p className="text-xs text-gray-400">v0.1.0 · Core Foundation</p>
+        <p className="text-xs text-gray-400">v0.2.0 · Security Hardening</p>
         <p className="text-xs text-gray-400">© 2026 Lauger</p>
       </div>
     </aside>
