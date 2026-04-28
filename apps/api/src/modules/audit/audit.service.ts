@@ -30,6 +30,7 @@ export async function getAuditLogs(opts: {
   resource?: string
   resourceId?: string
   userId?: string
+  action?: string
   skip: number
   take: number
 }) {
@@ -37,6 +38,7 @@ export async function getAuditLogs(opts: {
     ...(opts.resource && { resource: opts.resource }),
     ...(opts.resourceId && { resourceId: opts.resourceId }),
     ...(opts.userId && { userId: opts.userId }),
+    ...(opts.action && { action: opts.action }),
   }
 
   const [items, total] = await Promise.all([

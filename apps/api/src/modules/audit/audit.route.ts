@@ -13,11 +13,13 @@ export async function auditRoutes(fastify: FastifyInstance) {
         limit?: string
         resource?: string
         resourceId?: string
+        action?: string
       }
       const { page, limit, skip } = buildPaginationArgs(query)
       const { items, total } = await getAuditLogs({
         resource: query.resource,
         resourceId: query.resourceId,
+        action: query.action,
         skip,
         take: limit,
       })
