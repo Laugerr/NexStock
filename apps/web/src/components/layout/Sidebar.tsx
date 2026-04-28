@@ -12,6 +12,7 @@ import {
   MoveRight,
   ShoppingCart,
   ScanBarcode,
+  ShieldAlert,
   X,
 } from 'lucide-react'
 
@@ -50,6 +51,7 @@ const navGroups = [
     items: [
       { to: '/users', label: 'Users', icon: Users },
       { to: '/audit', label: 'Audit Log', icon: ClipboardList },
+      { to: '/security', label: 'Security', icon: ShieldAlert },
     ],
   },
 ]

@@ -9,6 +9,7 @@ import { InventoryPage } from '@/pages/inventory/InventoryPage'
 import { StockMovementsPage } from '@/pages/stock-movements/StockMovementsPage'
 import { UsersPage } from '@/pages/users/UsersPage'
 import { AuditPage } from '@/pages/audit/AuditPage'
+import { SecurityPage } from '@/pages/security/SecurityPage'
 import { GrnPage } from '@/pages/grn/GrnPage'
 import { PutAwayPage } from '@/pages/put-away/PutAwayPage'
 import { PickPackPage } from '@/pages/pick-pack/PickPackPage'
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
       { path: 'stock-movements', element: <StockMovementsPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'audit', element: <AuditPage /> },
+      { path: 'security', element: <SecurityPage /> },
       { path: 'grn', element: <GrnPage /> },
       { path: 'put-away', element: <PutAwayPage /> },
       { path: 'pick-pack', element: <PickPackPage /> },
