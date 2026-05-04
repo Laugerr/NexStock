@@ -33,7 +33,7 @@
     "@nexstock/tsconfig": "*",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.16.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^7.18.0",
     "@vercel/node": "^3.2.0",
     "eslint": "^8.57.1",
